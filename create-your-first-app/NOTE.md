@@ -5,7 +5,7 @@
   - code splitting でプロダクション用に最適化
   - SEO と パフォーマンスの観点から静的に複数ページを事前レンダリングしておきたい（SSR, CSR を行いたい）
   - React アプリと data store を連携させるためにサーバーサイドのコードを書く必要がある
-- フレームワークはこれらの要素を解決可能だが，一定のレベルの抽象度を持つ．（便利でないほど，エンジニアとしてのスキルが必要で，経験にはなるが．．）
+- フレームワークはこれらの要素を解決可能だが，一定のレベルの抽象度を持つ．（便利でないほどエンジニアとしてのスキルが必要で，経験にはなるが．．）
 - Next.js では上記の問題を解決し，ビルド時に成功の谷に導ける
 - Next.js はエンジニアの経験とビルトインの機能を多く持つ
   - page-based ルーチング機能（dynamic routes もサポート）
@@ -22,7 +22,7 @@
 - create-next-app に `--example` をつけることで，[このテンプレート](https://github.com/vercel/next-learn/tree/master/basics/learn-starter)が使えるようになる
 
 
-# Navigate Between Pages
+## Navigate Between Pages
 - file system routing を使用して新しいページを作成
 - Link コンポーネントを使って，Client-side のページ間ナビゲーションを可能にする
 - code splitting と prefetching に関する build-in について学ぶ
@@ -45,7 +45,7 @@
 - `<title>`などのメタデータや静的なものの扱いも行う
 - pages と同じようにルートからアクセス可能な public ディレクトリに置く（Google Site Verification である`robots.txt` にも有効？）
 - 通常の HTML では，img タグで書くが，これには画像を自分でレスポンシブにしたり，viewport に入った時しかロードされないなどの不便な側面がある．しかし，Next.js では簡単に扱える`Image`コンポーネントを提供している（リサイズ，最適化などのをデフォルトで提供している）
-- ブラウザがサポートしていればの話だが，WebP format が使用可能（スマホなどの小さい viewport に大きい画像を送らずに済むなどのいい側面がある）
+- ブラウザがサポートしていればの話だが，WebP format などの最近のフォーマットが使用可能（スマホなどの小さい viewport に大きい画像を送らずに済むなどのいい側面がある）
 - 自動画像最適化は，CMS などの外部ソースにホスティングされていたとしても，最適化される
   
 ## Metadata 
@@ -62,9 +62,9 @@
 - Tailwind CSS のような PostCSS libraries が使用可能
 - **styled-jsx, styled-components, emotion のような CSS-in-JS libraries も使用可能**
 - CSS modules を使うなら，拡張子は`.module.css`でないといけない
-- 使うなら，styles みたいな名前で import -> styles.container を className として割り当て
+- 使うなら，styles みたいな名前で import $\rightarrow$ styles.container を className として割り当て
 - dev tools をみると，class名が`layout_container_{randomstring}`となっていて重複の心配がないことがわかる
-- また，code splitting の観点でも CSS modules を使うことでバンドルサイズが小さくなるので寄与する
+- また，**code splitting の観点でも CSS modules を使うことでバンドルサイズが小さくなるので寄与する**
 - 全てのページにスタイルを効かせたい場合，global CSS を使用するといい
 - **`pages/_app.js`に import することで global CSS files（全体に当てられる CSS file） を追加できる**
 - global CSS files はどんな場所にどんな名前で置いていてもいい（今回は以下のようにする）
@@ -79,7 +79,7 @@
 
 ### PostCSS
 - Tailwind などの PosCSS を使うなら，`postcss.config.js`というトップレベルファイルを作る必要がある
-- その後`npm install -D tailwindcss autoprefixer postcss`で，postcss.config.cssにゴニョゴニョ書く．さらに tailwind.config.js にも content option を追記しておくことが推奨
+- その後`npm install -D tailwindcss autoprefixer postcss`で，postcss.config.cssにゴニョゴニョ書く．さらに tailwind.config.js にも content option を追記しておくことを推奨
 
 ### Sass
 - `.module.scss` or `.module.sass` で Sass を使えるが，もちろん install は必要（`npm install -D sass`） 
@@ -107,7 +107,7 @@
   - lib というディレクトリをルート直下に作成し，file からデータをパースする utility function を作成する（title, data, file name を取得して投稿の URL として使用したり，index page に日付順にソートしたデータをリストアップするなど）
   - この utility file を置くディレクトリ名は割り当てられていないが，慣習的には，`lib`とか`utils`を使う
 - データがパースされたら，次は getStaticProps で取ってくる作業
-- 外部とデータをやり取りする際は，`getSortedPropsData()`みたいな utility function 内で自由にやり取り可能で，`await fetch`を使ったり，`databaseClient.query('SELECT posts ...')`も可能となる（**というのも getStaticPropsはサーバ側でのみ動くので，browser側にバンドルされるデータに含まれないので，クライアント側に送信されない**）
+- 外部とデータをやり取りする際は，`getSortedPropsData()`みたいな utility function 内で自由にやり取り可能で，`await fetch`を使ったり，`databaseClient.query('SELECT posts ...')`も可能となる（**というのも getStaticProps はサーバ側でのみ動き，browser 側にバンドルされるデータに含まれないので，クライアント側に送信されない**）
 - まとめると，開発時は，getStaticPropsはリクエスト毎，プロダクション時は，build time に動く．しかし，getStaticPathsによってリターンされる fallback key を使うことでさらに enhance する（もちろん build time なので，HTTP headers や query parameters などのリクエスト時に利用可能なデータは扱えない）
 - **getStaticPropsはページから export されるので，ページファイルでなければ export できない**
 
@@ -117,5 +117,28 @@
 
 ## CSR
 - データを事前レンダリングする必要がないときは，SG w/o Data + CSR を取ればいい
-- userのダッシュボードページなどで役に立つ．というのは，ダッシュボードはプライベートでSEOには関係がなく，ページの事前レンダリングも必要ないため
+- userのダッシュボードページなどの**ユーザ特化のページ生成で役に立つ**（というのは，ダッシュボードはプライベートでSEOには関係がなく，ページの事前レンダリングも必要ないため）
 - Next.js は SWR という React hook を作成しており，CSR ではこれを使うことを超推奨している（cash, revalidation, tracking, インターバルをおいて再 fetchなどをサポートしているため）
+
+
+## Dynamic Routes
+- ブログデータを埋め込む index page を作成したが，肝心のブログが未作成（ブログページごとの URL が欲しい）
+- 前回は，page content が欲しかったので`getStaticProps`を用いてデータを fetch したが，今回は page path が欲しい
+- 外部データに依存するページのパスを静的に生成できる Next の機能として dynamic URLs が利用できる
+- 今回生成する静的なパスは`/posts/ssg-ssr`,`/posts/pre-rendering`とする
+- 具体的には．`[id].js`というページを`page/posts`直下に作成する（`[]`があると dynamic routes になる）
+- **他のページとほとんど同じように書けばいいが，`export async function getStaticPaths()`を書く必要がある点が異なる（この関数では id の可能性がある値をリストで返す）**
+- また，その後に`getStaticProps({params)`を実行する必要があり，この`params`は id を含む
+- `/lib/posts.js`に posts 直下にある`.md`を除いた名前（id）を取ってくるような utility 関数を追加する（**ここで注意すべきは，絶対に`[{params: {id: 'ssg-ssr'}}, {}]`みたいな object の配列を return すること**）この形式でないと fail する
+- `remark remark-html` install することで，markdown を使用できる
+- markdown を html に変えるために，`await remark().use(html).process(matterResult.content)`で取ってくる（同期的にデータを取得するために await を使用しており，これを使う getPostDataも await にする必要がでてくる）
+
+### Dynamic Routes Details
+- 外部からデータを fetch する際に，今回は `getStaticProps`，`getStaticPaths`を使用したが，`getAllPostIds`でも取ってこれる
+- `getStaticPathsは，開発時はすべてのリクエストに対して動作するが，プロダクション環境では，build time に動く
+- `getStaticPaths`内で`fallback: false`のとき，どのパスも返されなかったとき404ページが返される
+  - **`true`なら，build time に`getStaticPaths`から返されるパスは HTML にレンダリングされる一方，返されなかった場合は，そのパスに対する最初のリクエストページの "fallback" version が返る（404は表示しない）**（バックグラウンドでは，リクエストされたパスに対して静的にページを生成し，build 時にレンダリングされた他のページと同様にリクエスト時にそのまま返す）
+  - `blocking`なら，新たな path が`getStaticProps`によるサーバーサイドレンダリングがおき，将来起きうるリクエストのためにキャッシュされる（つまり1度だけしかレンダリングされない）
+- 全部のパスを網羅したければ，`...`をブラケット内に加えればいい（例えば，`pages/posts/[...id].js`とすれば，`/posts/a`, `/posts/a/b`なども抑えられ，`params.id`は`['a', 'b', 'c']`みたいになる）
+- router にアクセスしたければ，`next/router`から`useRouter` hook を import すればいい
+- 404ページをカスタムするには，`pages/404.js`を作ればいい（これも build 時に生成される）

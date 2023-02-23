@@ -157,3 +157,23 @@
 
 ## Deploying Your Next App
 - ここでは，Next.js によって作成されたプラットフォームである Vercel にデプロイする方法を学ぶ
+- Vercel は，静的 or headless content, commerce, or database と統合してビルドするアプリをビルドするサーバーレスのプラットフォーム
+- `nextjs-blog`リポジトリを import する（他にも色々と設定可能だが，Vercel は自動的に Next.js のアプリがあるかを検知して，最適な設定にしてくれるので触る必要はない（らしい））
+- Vercel にデプロイしたときにはデフォルトで：
+  - SG と assets（JS, CSS, imagesなど） を使用しているページは自動的に超高速な Vercel Edge Network から提供される
+  - SSR と API Routes を利用しているページは，独立したサーバーレス関数になる（つまり，API requests と page rendergin は無限にスケールさせることが可能）
+- Vercel の機能として以下がある：
+  - カスタムドメイン
+  - 環境変数
+  - 自動 HTTPS（何もしなくても勝手に HTTPS になっている）
+
+### Preview Deployment for Every Push
+- アプリに新しい branch を作って，何かしら変更を加えて push した後にプルリクを作成してみると，vervel bot からのコメントが見えるはず
+- 作成されたプルリクに対して，preview deployment が自動作成され，preview 用の URL をコラボレーターにシェアして，feedback をすぐにもらう．もし良いなら，main に merge すると Vercel の自動デプロイが走る
+- 以上が，DPS(Develop, Preview, Ship)ワークフロー（Develop は Next でコードを書いて，hot reloading などを活用することを指し，preview は差分を GitHub の branch に push し，その差分を preview deployment にて確認し，フィードバックをもらえる．Ship は，プロダクション環境にもっていく(ship)ため，プルリクを main にマージすることを指す）
+- Node.js をサポートするホスティングプロバイダならどこにでもデプロイ可能（`npm run build`でプロダクション環境を`.next`フォルダに作成し，`npm run start`で hybrid pages, SSG, SSR, API Routes をサポートする Node.js サーバが起動する．カスタマイズしたければ，`"start": "next start -p $PORT"`とするとポート番号を指定可能）
+
+### Tips
+- TypeScript を使おうぜ
+### What to Learn Next
+- Data Fetching, Environment Variables, Search Engine Optimization を学ぶ

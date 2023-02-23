@@ -95,30 +95,30 @@
 - pre-rendering には2種類（SSG, SSR）あり，**違いはいつ HTML を生成するか**
   - SSG は，ビルド時に HTML を生成し，リクエストの度に再利用可能
   - SSR は，リクエストごとに HTML を生成する
-- 開発時は，各ページはリクエストごとに事前レンダリングされ，プロダクション時には，build time に一度だけ SG が起こり，全てのリクエストでは起こらない（デフォルトではね）
+- 開発時は，各ページはリクエストごとに事前レンダリングされ，プロダクション時には，build time に一度だけ SG が起こり，全てのリクエストでは起こらない（デフォルトでは）
 - 実際には，ほとんどのページは SSG を使用し，一部に SSR を使用するという hybrid Next.js App も可能
 - では使い分けはというと，基本は SSG で，事前レンダリングが可能か（ユーザのリクエストの前にページが用意できるか）を自分で吟味して，可能なら SSG を利用する．もし不可能（データをリクエストごとに変化させるとか）なら，SSR を利用し，めちゃめちゃ頻繁にデータを更新しておく必要があるのなら CSR を使うべき
 
 ## SG
 - 外部データを使用するとき（外部 API を fetch する or DB に問い合わせとか）なら，Static Generation with Data を使用する
-  - 具体的には，`getStaticProps`という非同期関数を書いて，コンポーネントに読み込ませるということをする（この関数は build time に走る）
+  - 具体的には，データを fetch するページに`getStaticProps`という非同期関数を書いて，コンポーネントに読み込ませることで Next.js が「これはなにかしらのデータ依存があるから，先に解決する必要があるな」と認識してくれるらしい（この関数はプロダクション環境では build time ，開発時にはリクエストごとに走る）（また，受け取る側のコンポーネントは`Home(props)`みたいにすることで，`getStaticProps`から return されるオブジェクトの props key のデータを受け取ることが可能）
 - 今回のブログの投稿内容は，アプリのディレクトリに markdown file として入っているので外部データを fetch する必要はないが，読みこむ必要はある
   - markdown の最上部に title と date とかいうメタデータがあるのは，YAML Front Matter と呼ばれていて，`gray-matter`というライブラリでパースされる（当然インストールする必要あり）
   - lib というディレクトリをルート直下に作成し，file からデータをパースする utility function を作成する（title, data, file name を取得して投稿の URL として使用したり，index page に日付順にソートしたデータをリストアップするなど）
   - この utility file を置くディレクトリ名は割り当てられていないが，慣習的には，`lib`とか`utils`を使う
-- データがパースされたら，次は getStaticProps で取ってくる作業
-- 外部とデータをやり取りする際は，`getSortedPropsData()`みたいな utility function 内で自由にやり取り可能で，`await fetch`を使ったり，`databaseClient.query('SELECT posts ...')`も可能となる（**というのも getStaticProps はサーバ側でのみ動き，browser 側にバンドルされるデータに含まれないので，クライアント側に送信されない**）
-- まとめると，開発時は，getStaticPropsはリクエスト毎，プロダクション時は，build time に動く．しかし，getStaticPathsによってリターンされる fallback key を使うことでさらに enhance する（もちろん build time なので，HTTP headers や query parameters などのリクエスト時に利用可能なデータは扱えない）
-- **getStaticPropsはページから export されるので，ページファイルでなければ export できない**
+- データがパースされたら，次は`getStaticProps`で取ってくる作業
+- 外部とデータをやり取りする際は，`getSortedPropsData()`みたいな utility function 内で自由にやり取り可能で，その中で`await fetch`を使ったり，`databaseClient.query('SELECT posts ...')`みたいなことも可能（**というのも getStaticProps はサーバ側でのみ動き，browser 側にバンドルされるデータに含まれないので，クライアント側に送信されない**）
+- まとめると，開発時は`getStaticProps`はリクエスト毎，プロダクション時は，build time に動く．`getStaticPaths`の fallback key を使うことでさらに動作を良くすることができる（もちろん build time なので，HTTP headers や query parameters などのリクエスト時に利用可能なデータは扱えない）
+- **`getStaticProps`はページから export されるので，ページファイルでなければ export できない**
 
 ## SSR
-- もし，リクエスト時にデータが欲しければ，SSR を使う必要がある．具体的には，getServerSideProps を export する必要がある
+- **もしリクエスト時にデータを fetch したければ**，SSR を使う必要がある．具体的には，`getStaticProps`の代わりに`getServerSideProps`を export する必要がある
 - 今回のブログにはいらないので使わないが，実際は，`getServerProps(context)`という形で用い，context にリクエスト時のパラメータを含む．このため，リクエストごとにサーバで計算を行う必要があり，外部設定なしでは CDN にキャッシュできないので遅い（**なので，リクエスト時にデータを fetch する必要があるときにのみ用いる**）
 
 ## CSR
 - データを事前レンダリングする必要がないときは，SG w/o Data + CSR を取ればいい
-- userのダッシュボードページなどの**ユーザ特化のページ生成で役に立つ**（というのは，ダッシュボードはプライベートでSEOには関係がなく，ページの事前レンダリングも必要ないため）
-- Next.js は SWR という React hook を作成しており，CSR ではこれを使うことを超推奨している（cash, revalidation, tracking, インターバルをおいて再 fetchなどをサポートしているため）
+- user のダッシュボードページなどの**ユーザ特化のページ生成で役に立つ**（というのは，ダッシュボードはプライベートでSEOには関係がなく，ページの事前レンダリングも必要ないため）
+- Next.js はデータ fetch 用の SWR という React hook を作成しており，CSR ではこれを使うことを超推奨している（cash, revalidation, tracking, インターバルをおいて再 fetchなどをサポートしているため）
 
 
 ## Dynamic Routes
@@ -128,7 +128,7 @@
 - 今回生成する静的なパスは`/posts/ssg-ssr`,`/posts/pre-rendering`とする
 - 具体的には．`[id].js`というページを`page/posts`直下に作成する（`[]`があると dynamic routes になる）
 - **他のページとほとんど同じように書けばいいが，`export async function getStaticPaths()`を書く必要がある点が異なる（この関数では id の可能性がある値をリストで返す）**
-- また，その後に`getStaticProps({params)`を実行する必要があり，この`params`は id を含む
+- また，その後に`getStaticProps({params})`を実行する必要があり，この`params`は id を含む
 - `/lib/posts.js`に posts 直下にある`.md`を除いた名前（id）を取ってくるような utility 関数を追加する（**ここで注意すべきは，絶対に`[{params: {id: 'ssg-ssr'}}, {}]`みたいな object の配列を return すること**）この形式でないと fail する
 - `remark remark-html` install することで，markdown を使用できる
 - markdown を html に変えるために，`await remark().use(html).process(matterResult.content)`で取ってくる（同期的にデータを取得するために await を使用しており，これを使う getPostDataも await にする必要がでてくる）
@@ -142,3 +142,18 @@
 - 全部のパスを網羅したければ，`...`をブラケット内に加えればいい（例えば，`pages/posts/[...id].js`とすれば，`/posts/a`, `/posts/a/b`なども抑えられ，`params.id`は`['a', 'b', 'c']`みたいになる）
 - router にアクセスしたければ，`next/router`から`useRouter` hook を import すればいい
 - 404ページをカスタムするには，`pages/404.js`を作ればいい（これも build 時に生成される）
+
+
+## API Routes
+- 今回のブログには必要ないが，Node.js のサーバーレス関数として API endpoint を作成することが可能となる機能
+- `pages/api`ディレクトリを作成し，次のようなフォーマットにしたがって関数を作成することで，`Lambdas`のようなサーバーレス関数がデプロイ可能（`export default function handler(req, res){}`，ここで`req`は HTTP request, `res`は HTTP server reponse）
+- 例えば，`http://localhost:3000/api/hello`にアクセスすると，"`{"text": "Hello"}`が見える
+
+### Details
+- `getStaticProps`, `getStaticPaths`から fetch しないこと．直接サーバサイドのコードを書くか，ヘルパ関数をよぶこと．（なぜなら，`getStaticProps`, `getStaticPaths`もサーバ側で動き，クライアント側では動かない（というかクライアント側に送られない）ため）
+- API routes の使用例として，form の入力を扱うケースがある（form 用のページを作成し，API Route で POST request が送られたとすると，直接それを database に保存するコードを書くことが可能．というのも上述したように client bundle に含まれないため安全だから）
+- SG は headless CMS からデータを fetch するときに便利だが，現段階では draft で，ページで preview したいときには適さない（このようなケースでは build time でなく，request ごとに rendering してほしいはず）
+- API Routes を使用する Preview Mode を Next は提供している
+
+## Deploying Your Next App
+- ここでは，Next.js によって作成されたプラットフォームである Vercel にデプロイする方法を学ぶ

@@ -1,4 +1,4 @@
-# NextJs Tutorial
+# NextJS Tutorial
 - foundations
 - create-your-first-app
   - create a nextjs app
